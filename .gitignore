@@ -1,6 +1,23 @@
-# Ignore environment and virtual environment files
+# --- Environment & Secrets ---
 .env
+
+# --- Virtual Environment ---
 venv/
 __pycache__/
 *.pyc
+
+# --- OS / Editor Files ---
 .DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
+
+# --- IDE Config ---
+.vscode/
+.idea/
+
+# --- Python Build Files ---
+build/
+dist/
+*.egg-info/

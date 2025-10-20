@@ -1,0 +1,18 @@
+
+✅ Looks professional and ready for your GitHub page.
+
+---
+
+## ⚙️ **3️⃣ render.yaml**
+Create this file in the **root folder** (`juahaki-chatbot/`) — this tells Render exactly how to build and run Juahaki.
+
+```yaml
+services:
+  - type: web
+    name: juahaki-chatbot
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python app.py"
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
