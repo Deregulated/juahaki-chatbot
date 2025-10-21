@@ -18,65 +18,149 @@
     <!-- Settings Panel -->
     <div class="settings-panel" id="settingsPanel">
         <div class="settings-header">
-            <h3>Settings</h3>
+            <h3>Chat Settings</h3>
             <button class="close-btn" id="closeSettings">×</button>
         </div>
         
         <div class="settings-content">
-            <!-- Background Settings -->
-            <div class="setting-group">
-                <h4>Background</h4>
-                <div class="background-options">
-                    <div class="bg-option" data-bg="bg1.jpg">
-                        <img src="{{ url_for('static', filename='backgrounds/bg1.jpg') }}" alt="Background 1">
-                        <span>Background 1</span>
+            <!-- Background Tabs -->
+            <div class="background-tabs">
+                <button class="tab-btn active" data-tab="solid">Solid Colors</button>
+                <button class="tab-btn" data-tab="gradient">Gradients</button>
+                <button class="tab-btn" data-tab="pattern">Patterns</button>
+                <button class="tab-btn" data-tab="image">Images</button>
+                <button class="tab-btn" data-tab="custom">Custom</button>
+            </div>
+
+            <!-- Solid Colors -->
+            <div class="tab-content active" id="solid-tab">
+                <div class="color-grid">
+                    {% for color in background_options.solid_colors %}
+                    <div class="color-option {% if background_settings.type == 'solid' and background_settings.value == color.value %}active{% endif %}" 
+                         data-type="{{ color.type }}" data-value="{{ color.value }}">
+                        <div class="color-preview" style="background-color: {{ color.value }}"></div>
+                        <span class="color-name">{{ color.name }}</span>
                     </div>
-                    <div class="bg-option" data-bg="bg2.jpg">
-                        <img src="{{ url_for('static', filename='backgrounds/bg2.jpg') }}" alt="Background 2">
-                        <span>Background 2</span>
-                    </div>
-                    <div class="bg-option" data-bg="bg3.jpg">
-                        <img src="{{ url_for('static', filename='backgrounds/bg3.jpg') }}" alt="Background 3">
-                        <span>Background 3</span>
-                    </div>
-                </div>
-                
-                <div class="upload-section">
-                    <input type="file" id="backgroundUpload" accept="image/*" style="display: none;">
-                    <button class="upload-btn" id="uploadBgBtn">Upload Background</button>
-                    <div class="upload-preview" id="uploadPreview"></div>
+                    {% endfor %}
                 </div>
             </div>
 
-            <!-- Font Settings -->
+            <!-- Gradients -->
+            <div class="tab-content" id="gradient-tab">
+                <div class="color-grid">
+                    {% for gradient in background_options.gradients %}
+                    <div class="color-option {% if background_settings.type == 'gradient' and background_settings.value == gradient.value %}active{% endif %}" 
+                         data-type="{{ gradient.type }}" data-value="{{ gradient.value }}">
+                        <div class="color-preview" style="background: {{ gradient.value }}"></div>
+                        <span class="color-name">{{ gradient.name }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Patterns -->
+            <div class="tab-content" id="pattern-tab">
+                <div class="color-grid">
+                    {% for pattern in background_options.patterns %}
+                    <div class="color-option {% if background_settings.type == 'pattern' and background_settings.value == pattern.value %}active{% endif %}" 
+                         data-type="{{ pattern.type }}" data-value="{{ pattern.value }}" data-size="{{ pattern.size }}">
+                        <div class="color-preview pattern-preview" style="background: {{ pattern.value }}; background-size: {{ pattern.size }}"></div>
+                        <span class="color-name">{{ pattern.name }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Images -->
+            <div class="tab-content" id="image-tab">
+                <div class="color-grid">
+                    {% for image in background_options.images %}
+                    <div class="color-option {% if background_settings.type == 'image' and background_settings.value == image.value %}active{% endif %}" 
+                         data-type="{{ image.type }}" data-value="{{ image.value }}">
+                        <div class="color-preview image-preview" style="background-image: url('{{ url_for('static', filename='backgrounds/' + image.value) }}')"></div>
+                        <span class="color-name">{{ image.name }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Custom Upload -->
+            <div class="tab-content" id="custom-tab">
+                <div class="upload-section">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">📁</div>
+                        <p>Click to upload your background image</p>
+                        <small>Supported formats: JPG, PNG, GIF</small>
+                        <input type="file" id="backgroundUpload" accept="image/*" style="display: none;">
+                    </div>
+                    <div class="upload-preview" id="uploadPreview"></div>
+                    
+                    <div class="recent-uploads" id="recentUploads">
+                        <h4>Recent Uploads</h4>
+                        <div class="recent-grid" id="recentGrid">
+                            <!-- Recent uploads will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice Settings -->
+        <div class="setting-group">
+            <h4>Voice Settings</h4>
+            <div class="voice-options">
+                <label for="voiceSelect">Select Voice:</label>
+                <select id="voiceSelect">
+                    <option value="default">Default Voice</option>
+                    <option value="male1">Male Voice 1</option>
+                    <option value="male2">Male Voice 2</option>
+                    <option value="female1">Female Voice 1</option>
+                    <option value="female2">Female Voice 2</option>
+                </select>
+                
+                <div class="voice-controls">
+                    <label>Speech Rate:</label>
+                    <input type="range" id="speechRate" min="0.5" max="2" step="0.1" value="1">
+                    <span id="speechRateValue">1.0</span>
+                </div>
+                
+                <div class="voice-controls">
+                    <label>Speech Pitch:</label>
+                    <input type="range" id="speechPitch" min="0.5" max="2" step="0.1" value="1">
+                    <span id="speechPitchValue">1.0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Other Settings -->
+        <div class="other-settings">
             <div class="setting-group">
-                <h4>Font</h4>
+                <h4>Font Settings</h4>
                 <div class="font-options">
                     <select id="fontFamily">
-                        <option value="Inter">Inter</option>
-                        <option value="Roboto">Roboto</option>
-                        <option value="Open Sans">Open Sans</option>
-                        <option value="Montserrat">Montserrat</option>
-                        <option value="Arial">Arial</option>
+                        <option value="Inter" {% if font_family == 'Inter' %}selected{% endif %}>Inter</option>
+                        <option value="Roboto" {% if font_family == 'Roboto' %}selected{% endif %}>Roboto</option>
+                        <option value="Open Sans" {% if font_family == 'Open Sans' %}selected{% endif %}>Open Sans</option>
+                        <option value="Montserrat" {% if font_family == 'Montserrat' %}selected{% endif %}>Montserrat</option>
+                        <option value="Arial" {% if font_family == 'Arial' %}selected{% endif %}>Arial</option>
                     </select>
                     
                     <div class="font-size-control">
                         <label>Font Size:</label>
-                        <input type="range" id="fontSize" min="14" max="22" value="16">
-                        <span id="fontSizeValue">16px</span>
+                        <input type="range" id="fontSize" min="14" max="22" value="{{ font_size.replace('px', '') }}">
+                        <span id="fontSizeValue">{{ font_size }}</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Color Settings -->
             <div class="setting-group">
-                <h4>Colors</h4>
+                <h4>Theme Color</h4>
                 <div class="color-options">
-                    <div class="color-option" data-color="#10a37f" style="background-color: #10a37f;"></div>
-                    <div class="color-option" data-color="#2563eb" style="background-color: #2563eb;"></div>
-                    <div class="color-option" data-color="#dc2626" style="background-color: #dc2626;"></div>
-                    <div class="color-option" data-color="#7c3aed" style="background-color: #7c3aed;"></div>
-                    <div class="color-option" data-color="#059669" style="background-color: #059669;"></div>
+                    <div class="color-option {% if primary_color == '#10a37f' %}active{% endif %}" data-color="#10a37f" style="background-color: #10a37f;"></div>
+                    <div class="color-option {% if primary_color == '#2563eb' %}active{% endif %}" data-color="#2563eb" style="background-color: #2563eb;"></div>
+                    <div class="color-option {% if primary_color == '#dc2626' %}active{% endif %}" data-color="#dc2626" style="background-color: #dc2626;"></div>
+                    <div class="color-option {% if primary_color == '#7c3aed' %}active{% endif %}" data-color="#7c3aed" style="background-color: #7c3aed;"></div>
+                    <div class="color-option {% if primary_color == '#059669' %}active{% endif %}" data-color="#059669" style="background-color: #059669;"></div>
                 </div>
                 
                 <div class="custom-color">
@@ -85,6 +169,16 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Voice Control Panel -->
+    <div class="voice-control-panel" id="voiceControlPanel">
+        <button class="voice-control-btn" id="playPauseBtn">▶️</button>
+        <button class="voice-control-btn" id="stopBtn">⏹️</button>
+        <div class="voice-progress">
+            <div class="voice-progress-bar" id="voiceProgressBar"></div>
+        </div>
+        <span class="voice-status" id="voiceStatus">Ready</span>
     </div>
 
     <!-- Main Container -->
@@ -120,6 +214,9 @@
                     <span class="subtitle">Kenyan Law Specialist</span>
                 </div>
                 <div class="header-right">
+                    <button class="header-btn voice-toggle" id="voiceToggleBtn" title="Toggle Voice Reading">
+                        🔊
+                    </button>
                     <button class="header-btn" id="languageBtn">
                         {% if language == 'english' %}EN
                         {% else %}SW{% endif %}
@@ -139,6 +236,20 @@
                             <button class="quick-btn" data-question="Land registration process Kenya">Land Law</button>
                             <button class="quick-btn" data-question="Criminal procedure code Kenya">Criminal Procedure</button>
                         </div>
+                        <div class="feature-highlights">
+                            <div class="feature-item">
+                                <span class="feature-icon">🎨</span>
+                                <span>Customizable Backgrounds</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">🔊</span>
+                                <span>Text-to-Speech</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">📋</span>
+                                <span>Copy Responses</span>
+                            </div>
+                        </div>
                         <div class="legal-disclaimer">
                             <small>Disclaimer: This provides legal information, not advice. Consult a qualified advocate for legal advice.</small>
                         </div>
@@ -155,18 +266,22 @@
                                id="messageInput" 
                                placeholder="{{ 'Ask about Kenyan law, constitution, or legal system...' if language == 'english' else 'Uliza kuhusu sheria za Kenya, katiba, au mfumo wa kisheria...' }}" 
                                autocomplete="off">
-                        <button id="sendBtn" class="send-btn">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </button>
+                        <div class="input-actions">
+                            <button class="action-btn" id="clearBtn" title="Clear chat">🗑️</button>
+                            <button class="action-btn" id="copyChatBtn" title="Copy conversation">📋</button>
+                            <button id="sendBtn" class="send-btn">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                     <div class="input-footer">
                         <span class="hint-text">
                             {% if language == 'english' %}
-                                Specialized in Kenyan legal matters only
+                                Specialized in Kenyan legal matters only • Press Enter to send
                             {% else %}
-                                Imejikita kwenye masuala ya kisheria ya Kenya pekee
+                                Imejikita kwenye masuala ya kisheria ya Kenya pekee • Bonyeza Enter kutuma
                             {% endif %}
                         </span>
                     </div>
@@ -177,6 +292,9 @@
 
     <!-- Mobile Overlay -->
     <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast"></div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>

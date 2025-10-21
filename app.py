@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 import random
 import base64
+import json
 
 # Load environment variables
 load_dotenv()
@@ -209,24 +210,78 @@ class KenyanLawAssistant:
 # Initialize assistant
 assistant = KenyanLawAssistant()
 
+# Background options similar to WhatsApp
+BACKGROUND_OPTIONS = {
+    'solid_colors': [
+        {'id': 'solid_white', 'name': 'White', 'value': '#ffffff', 'type': 'solid'},
+        {'id': 'solid_black', 'name': 'Black', 'value': '#000000', 'type': 'solid'},
+        {'id': 'solid_gray', 'name': 'Gray', 'value': '#808080', 'type': 'solid'},
+        {'id': 'solid_blue', 'name': 'Blue', 'value': '#007bff', 'type': 'solid'},
+        {'id': 'solid_green', 'name': 'Green', 'value': '#28a745', 'type': 'solid'},
+        {'id': 'solid_red', 'name': 'Red', 'value': '#dc3545', 'type': 'solid'},
+        {'id': 'solid_purple', 'name': 'Purple', 'value': '#6f42c1', 'type': 'solid'},
+        {'id': 'solid_orange', 'name': 'Orange', 'value': '#fd7e14', 'type': 'solid'},
+    ],
+    'gradients': [
+        {'id': 'gradient_blue', 'name': 'Blue Gradient', 'value': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 'type': 'gradient'},
+        {'id': 'gradient_sunset', 'name': 'Sunset', 'value': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', 'type': 'gradient'},
+        {'id': 'gradient_ocean', 'name': 'Ocean', 'value': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', 'type': 'gradient'},
+        {'id': 'gradient_forest', 'name': 'Forest', 'value': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', 'type': 'gradient'},
+        {'id': 'gradient_warm', 'name': 'Warm', 'value': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', 'type': 'gradient'},
+        {'id': 'gradient_cool', 'name': 'Cool', 'value': 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)', 'type': 'gradient'},
+    ],
+    'patterns': [
+        {'id': 'pattern_dots', 'name': 'Dots', 'value': 'radial-gradient(circle, #000000 1px, transparent 1px)', 'type': 'pattern', 'size': '20px 20px'},
+        {'id': 'pattern_lines', 'name': 'Lines', 'value': 'repeating-linear-gradient(45deg, transparent, transparent 10px, #f0f0f0 10px, #f0f0f0 20px)', 'type': 'pattern'},
+        {'id': 'pattern_grid', 'name': 'Grid', 'value': 'linear-gradient(#e0e0e0 1px, transparent 1px), linear-gradient(90deg, #e0e0e0 1px, transparent 1px)', 'type': 'pattern', 'size': '20px 20px'},
+        {'id': 'pattern_zigzag', 'name': 'Zigzag', 'value': 'linear-gradient(135deg, #e0e0e0 25%, transparent 25%), linear-gradient(225deg, #e0e0e0 25%, transparent 25%), linear-gradient(315deg, #e0e0e0 25%, transparent 25%), linear-gradient(45deg, #e0e0e0 25%, transparent 25%)', 'type': 'pattern', 'size': '20px 20px'},
+    ],
+    'images': [
+        {'id': 'image_1', 'name': 'Nature', 'value': 'bg1.jpg', 'type': 'image'},
+        {'id': 'image_2', 'name': 'Mountains', 'value': 'bg2.jpg', 'type': 'image'},
+        {'id': 'image_3', 'name': 'Beach', 'value': 'bg3.jpg', 'type': 'image'},
+    ]
+}
+
 @app.route('/')
 def index():
-    # Initialize session defaults
-    session.setdefault('background', 'bg1.jpg')
-    session.setdefault('language', 'english')
-    session.setdefault('font_family', 'Inter')
-    session.setdefault('font_size', '16px')
-    session.setdefault('primary_color', '#10a37f')
-    session.setdefault('background_type', 'predefined')
+    # Initialize session defaults with proper background persistence
+    if 'background_settings' not in session:
+        session['background_settings'] = {
+            'type': 'solid',
+            'value': '#ffffff',
+            'size': ''
+        }
     
-    backgrounds = ['bg1.jpg', 'bg2.jpg', 'bg3.jpg']
+    if 'language' not in session:
+        session['language'] = 'english'
+    
+    if 'font_family' not in session:
+        session['font_family'] = 'Inter'
+    
+    if 'font_size' not in session:
+        session['font_size'] = '16px'
+    
+    if 'primary_color' not in session:
+        session['primary_color'] = '#10a37f'
+    
+    if 'theme_mode' not in session:
+        session['theme_mode'] = 'light'
+    
+    # Get background settings with safe defaults
+    background_settings = session.get('background_settings', {
+        'type': 'solid',
+        'value': '#ffffff', 
+        'size': ''
+    })
+    
     return render_template('index.html', 
-                         background=session.get('background'),
-                         language=session.get('language'),
-                         font_family=session.get('font_family'),
-                         font_size=session.get('font_size'),
-                         primary_color=session.get('primary_color'),
-                         backgrounds=backgrounds)
+                         background_settings=background_settings,
+                         language=session.get('language', 'english'),
+                         font_family=session.get('font_family', 'Inter'),
+                         font_size=session.get('font_size', '16px'),
+                         primary_color=session.get('primary_color', '#10a37f'),
+                         background_options=BACKGROUND_OPTIONS)
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -259,9 +314,36 @@ def update_settings():
         for key, value in settings.items():
             session[key] = value
         
+        session.modified = True
         return jsonify({'status': 'success', 'message': 'Settings updated successfully'})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
+
+@app.route('/set-background', methods=['POST'])
+def set_background():
+    """Set background from predefined options"""
+    try:
+        data = request.json
+        bg_type = data.get('type')
+        bg_value = data.get('value')
+        bg_size = data.get('size', '')
+        
+        # Update session with complete background settings
+        session['background_settings'] = {
+            'type': bg_type,
+            'value': bg_value,
+            'size': bg_size
+        }
+        session.modified = True
+        
+        return jsonify({
+            'status': 'success', 
+            'message': 'Background updated successfully',
+            'background': session['background_settings']
+        })
+            
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f'Error setting background: {str(e)}'})
 
 @app.route('/upload-background', methods=['POST'])
 def upload_background():
@@ -287,13 +369,17 @@ def upload_background():
             file.save(filepath)
             
             # Update session
-            session['background'] = filename
-            session['background_type'] = 'uploaded'
+            session['background_settings'] = {
+                'type': 'uploaded',
+                'value': filename,
+                'size': ''
+            }
+            session.modified = True
             
             return jsonify({
                 'status': 'success', 
                 'message': 'Background uploaded successfully',
-                'filename': filename
+                'background': session['background_settings']
             })
             
     except Exception as e:
@@ -311,11 +397,12 @@ def toggle_language():
         new_language = 'english'
     
     session['language'] = new_language
+    session.modified = True
     
     # Return language info for UI update
     language_info = {
-        'english': {'name': 'English', 'display': 'English', 'next': 'Swahili'},
-        'swahili': {'name': 'Swahili', 'display': 'Swahili', 'next': 'English'}
+        'english': {'name': 'English', 'display': 'EN', 'next': 'Swahili'},
+        'swahili': {'name': 'Swahili', 'display': 'SW', 'next': 'English'}
     }
     
     return jsonify({

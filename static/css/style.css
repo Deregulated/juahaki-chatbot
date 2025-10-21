@@ -55,7 +55,7 @@ body {
     position: fixed;
     top: 20px;
     left: 20px;
-    z-index: 1001;
+    z-index: 1003; /* Increased z-index */
     background: transparent;
     border: none;
     cursor: pointer;
@@ -78,7 +78,7 @@ body {
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 998;
+    z-index: 999; /* Below sidebar but above everything else */
 }
 
 /* Layout */
@@ -95,7 +95,7 @@ body {
     display: flex;
     flex-direction: column;
     transition: transform 0.3s ease;
-    z-index: 1000;
+    z-index: 1000; /* Sidebar z-index */
     position: relative;
 }
 
@@ -224,6 +224,8 @@ body {
     flex-direction: column;
     min-width: 0;
     background: var(--bg-primary);
+    position: relative;
+    z-index: 1; /* Ensure main content is below sidebar */
 }
 
 .main-header {
@@ -234,6 +236,15 @@ body {
     border-bottom: 1px solid var(--border-color);
     background: var(--bg-primary);
     min-height: var(--mobile-header-height);
+    position: relative;
+    z-index: 100; /* Header should be above main content but below sidebar */
+}
+
+.header-left {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0; /* Allow text truncation */
 }
 
 .header-left h1 {
@@ -241,16 +252,24 @@ body {
     font-weight: 600;
     margin-bottom: 0.25rem;
     color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .subtitle {
     font-size: 0.8rem;
     color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .header-right {
     display: flex;
     gap: 0.5rem;
+    flex-shrink: 0;
+    margin-left: 1rem;
 }
 
 .header-btn {
@@ -263,6 +282,7 @@ body {
     transition: all 0.2s ease;
     font-size: 0.8rem;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .header-btn:hover {
@@ -492,7 +512,7 @@ body {
     color: var(--text-tertiary);
 }
 
-/* Settings Panel */
+/* Settings Panel - FIXED Z-INDEX */
 .settings-panel {
     position: fixed;
     top: 0;
@@ -503,7 +523,7 @@ body {
     border-left: 1px solid var(--border-color);
     box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
     transition: right 0.3s ease;
-    z-index: 1000;
+    z-index: 1002; /* Higher than sidebar (1000) and overlay (999) */
     overflow-y: auto;
 }
 
@@ -801,7 +821,7 @@ body {
     40% { transform: scale(1); opacity: 1; }
 }
 
-/* Responsive Design */
+/* Responsive Design - FIXED HEADER LAYOUT */
 @media (max-width: 768px) {
     :root {
         --sidebar-width: 280px;
@@ -817,7 +837,7 @@ body {
         left: calc(-1 * var(--sidebar-width));
         top: 0;
         bottom: 0;
-        z-index: 999;
+        z-index: 1000; /* Sidebar z-index */
         box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
     }
 
@@ -829,16 +849,37 @@ body {
         display: block;
     }
 
+    /* FIXED HEADER LAYOUT FOR MOBILE */
     .main-header {
         padding: 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .header-left {
+        flex: 1;
+        min-width: 0;
+        order: 1;
     }
 
     .header-left h1 {
         font-size: 1.1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .subtitle {
         font-size: 0.75rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .header-right {
+        order: 2;
+        margin-left: auto;
+        flex-shrink: 0;
     }
 
     .header-btn {
@@ -878,6 +919,7 @@ body {
 
     .settings-panel {
         width: 100%;
+        z-index: 1002; /* Ensure settings panel is above sidebar on mobile */
     }
 
     .background-options {
@@ -910,6 +952,26 @@ body {
 
     .main-header {
         padding: 0.75rem;
+        flex-direction: row; /* Keep horizontal layout */
+        align-items: center;
+    }
+
+    .header-left {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .header-left h1 {
+        font-size: 1rem; /* Slightly smaller on very small screens */
+    }
+
+    .header-right {
+        flex-shrink: 0;
+    }
+
+    .header-btn {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.7rem;
     }
 
     .chat-area {
@@ -939,6 +1001,28 @@ body {
 
     .settings-content {
         padding: 1rem;
+    }
+}
+
+/* Extra small screens - ensure header text doesn't get covered */
+@media (max-width: 360px) {
+    .main-header {
+        padding: 0.5rem;
+    }
+
+    .header-left h1 {
+        font-size: 0.9rem;
+        max-width: 120px; /* Limit width to prevent overlap */
+    }
+
+    .subtitle {
+        font-size: 0.7rem;
+        max-width: 120px;
+    }
+
+    .header-btn {
+        padding: 0.3rem 0.4rem;
+        font-size: 0.65rem;
     }
 }
 
@@ -1037,4 +1121,943 @@ select:focus-visible {
         opacity: 1;
         transform: translateX(0);
     }
+}
+
+/* Ensure settings panel is always on top when active */
+.settings-panel.active {
+    z-index: 1002 !important;
+}
+
+/* Close sidebar when settings open on mobile */
+@media (max-width: 768px) {
+    .settings-panel.active ~ .sidebar.active {
+        left: calc(-1 * var(--sidebar-width));
+    }
+    
+    .settings-panel.active ~ .mobile-overlay.active {
+        display: none;
+    }
+}
+
+/* Background Tabs */
+.background-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.tab-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.tab-btn.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Color Grid for Background Options */
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.color-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--bg-primary);
+}
+
+.color-option:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.color-option.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(16, 163, 127, 0.2);
+}
+
+.color-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.pattern-preview, .image-preview {
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+.color-name {
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    text-align: center;
+    font-weight: 500;
+}
+
+/* Upload Area */
+.upload-area {
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--bg-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.upload-area:hover {
+    border-color: var(--primary-color);
+    background: var(--bg-tertiary);
+}
+
+.upload-area.dragover {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: white;
+}
+
+.upload-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.upload-area p {
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.upload-area small {
+    color: var(--text-tertiary);
+}
+
+.upload-preview {
+    margin-bottom: 1.5rem;
+    display: none;
+}
+
+.upload-preview img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+/* Recent Uploads */
+.recent-uploads {
+    margin-top: 1.5rem;
+}
+
+.recent-uploads h4 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.recent-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+}
+
+.recent-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    aspect-ratio: 1;
+}
+
+.recent-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.recent-item:hover::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.recent-item.active::after {
+    content: '✓';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(16, 163, 127, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* Other Settings Section */
+.other-settings {
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+/* Background Application */
+body.solid-bg {
+    background-image: none !important;
+    background-color: var(--bg-solid-color);
+}
+
+body.gradient-bg {
+    background-image: var(--bg-gradient) !important;
+    background-size: cover !important;
+}
+
+body.pattern-bg {
+    background-image: var(--bg-pattern) !important;
+    background-size: var(--bg-pattern-size) !important;
+}
+
+body.image-bg {
+    background-image: var(--bg-image) !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+}
+
+body.uploaded-bg {
+    background-image: var(--bg-uploaded) !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+}
+
+/* Responsive Background Grid */
+@media (max-width: 768px) {
+    .color-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .recent-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .background-tabs {
+        gap: 0.25rem;
+    }
+    
+    .tab-btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.75rem;
+    }
+    
+    .color-preview {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+@media (max-width: 480px) {
+    .color-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .recent-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .upload-area {
+        padding: 1.5rem;
+    }
+    
+    .upload-icon {
+        font-size: 1.5rem;
+    }
+}
+
+/* Dark mode adjustments for patterns */
+[data-theme="dark"] .pattern-preview {
+    filter: brightness(0.8);
+}
+
+/* Smooth background transitions */
+body {
+    transition: background-color 0.3s ease, background-image 0.3s ease;
+}
+
+/* Settings button with background icon */
+.settings-btn {
+    position: relative;
+}
+
+/* Background preview in settings button */
+.settings-btn::before {
+    content: '🎨';
+    margin-right: 0.5rem;
+}
+/* Background Application - FIXED */
+body {
+    transition: background-color 0.3s ease, background-image 0.3s ease !important;
+}
+
+/* Solid Background */
+body[data-bg-type="solid"] {
+    background-image: none !important;
+    background-color: var(--bg-solid-color) !important;
+}
+
+/* Gradient Background */
+body[data-bg-type="gradient"] {
+    background-image: var(--bg-gradient) !important;
+    background-size: cover !important;
+    background-attachment: fixed !important;
+    background-position: center !important;
+}
+
+/* Pattern Background */
+body[data-bg-type="pattern"] {
+    background-image: var(--bg-pattern) !important;
+    background-size: var(--bg-pattern-size, '20px 20px') !important;
+    background-attachment: fixed !important;
+}
+
+/* Image Background */
+body[data-bg-type="image"] {
+    background-image: var(--bg-image) !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+}
+
+/* Uploaded Background */
+body[data-bg-type="uploaded"] {
+    background-image: var(--bg-uploaded) !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+}
+
+/* Ensure chat content remains readable with backgrounds */
+.chat-area, .sidebar, .main-content {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .chat-area,
+[data-theme="dark"] .sidebar,
+[data-theme="dark"] .main-content {
+    background: rgba(52, 53, 65, 0.85) !important;
+}
+
+/* Make messages slightly transparent to show background */
+.message {
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(5px);
+}
+
+[data-theme="dark"] .message {
+    background: rgba(68, 70, 84, 0.9) !important;
+}
+
+/* Input area */
+.input-wrapper {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(5px);
+}
+
+[data-theme="dark"] .input-wrapper {
+    background: rgba(68, 70, 84, 0.95) !important;
+}
+
+/* Settings panel */
+.settings-panel {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(15px);
+}
+
+[data-theme="dark"] .settings-panel {
+    background: rgba(52, 53, 65, 0.95) !important;
+}
+
+/* Background Tabs */
+.background-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.tab-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.tab-btn.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Color Grid for Background Options */
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.color-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--bg-primary);
+}
+
+.color-option:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.color-option.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(16, 163, 127, 0.2);
+}
+
+.color-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.pattern-preview, .image-preview {
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+.color-name {
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    text-align: center;
+    font-weight: 500;
+}
+
+/* Upload Area */
+.upload-area {
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--bg-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.upload-area:hover {
+    border-color: var(--primary-color);
+    background: var(--bg-tertiary);
+}
+
+.upload-area.dragover {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: white;
+}
+
+.upload-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.upload-area p {
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.upload-area small {
+    color: var(--text-tertiary);
+}
+
+.upload-preview {
+    margin-bottom: 1.5rem;
+    display: none;
+}
+
+.upload-preview img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+/* Recent Uploads */
+.recent-uploads {
+    margin-top: 1.5rem;
+}
+
+.recent-uploads h4 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.recent-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+}
+
+.recent-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    aspect-ratio: 1;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.recent-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.recent-item:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.recent-item.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(16, 163, 127, 0.2);
+}
+
+.recent-item.active::after {
+    content: '✓';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: var(--primary-color);
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+/* Other Settings Section */
+.other-settings {
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.no-uploads {
+    text-align: center;
+    color: var(--text-tertiary);
+    font-style: italic;
+    padding: 2rem;
+}
+
+/* Responsive Background Grid */
+@media (max-width: 768px) {
+    .color-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .recent-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .background-tabs {
+        gap: 0.25rem;
+    }
+    
+    .tab-btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.75rem;
+    }
+    
+    .color-preview {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .upload-area {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .color-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .recent-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .upload-icon {
+        font-size: 1.5rem;
+    }
+}
+
+/* Dark mode adjustments for patterns */
+[data-theme="dark"] .pattern-preview {
+    filter: brightness(0.8);
+}
+/* Voice Control Panel */
+.voice-control-panel {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 25px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.voice-control-panel.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.voice-control-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+    font-size: 1.1rem;
+}
+
+.voice-control-btn:hover {
+    background: var(--bg-tertiary);
+}
+
+.voice-progress {
+    flex: 1;
+    height: 4px;
+    background: var(--bg-tertiary);
+    border-radius: 2px;
+    overflow: hidden;
+    min-width: 100px;
+}
+
+.voice-progress-bar {
+    height: 100%;
+    background: var(--primary-color);
+    width: 0%;
+    transition: width 0.1s ease;
+}
+
+.voice-status {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    min-width: 60px;
+}
+
+/* Voice Settings */
+.voice-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.voice-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.voice-controls label {
+    flex-shrink: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    min-width: 80px;
+}
+
+.voice-controls input {
+    flex: 1;
+}
+
+.voice-controls span {
+    min-width: 30px;
+    text-align: right;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Message Actions */
+.message-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.message:hover .message-actions {
+    opacity: 1;
+}
+
+.action-btn {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+    color: var(--text-secondary);
+}
+
+.action-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Input Actions */
+.input-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* Feature Highlights */
+.feature-highlights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+.feature-icon {
+    font-size: 1.2rem;
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--primary-color);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    transform: translateX(150%);
+    transition: transform 0.3s ease;
+    max-width: 300px;
+}
+
+.toast.show {
+    transform: translateX(0);
+}
+
+.toast.success {
+    background: #10a37f;
+}
+
+.toast.error {
+    background: #dc2626;
+}
+
+.toast.info {
+    background: #2563eb;
+}
+
+/* Voice Toggle Button */
+.voice-toggle {
+    position: relative;
+}
+
+.voice-toggle.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Copy Button States */
+.copy-btn.copied {
+    background: #10a37f;
+    color: white;
+}
+
+/* Background Persistence Fix */
+body {
+    transition: background-color 0.5s ease, background-image 0.5s ease !important;
+}
+
+/* Ensure background applies properly */
+body[data-bg-type="solid"] {
+    background: var(--bg-solid-color) !important;
+    background-image: none !important;
+}
+
+body[data-bg-type="gradient"] {
+    background: var(--bg-gradient) !important;
+    background-size: cover !important;
+    background-attachment: fixed !important;
+    background-position: center !important;
+}
+
+body[data-bg-type="pattern"] {
+    background: var(--bg-pattern) !important;
+    background-size: var(--bg-pattern-size, '20px 20px') !important;
+    background-attachment: fixed !important;
+}
+
+body[data-bg-type="image"] {
+    background: var(--bg-image) !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+}
+
+body[data-bg-type="uploaded"] {
+    background: var(--bg-uploaded) !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+}
+
+/* Mobile voice controls */
+@media (max-width: 768px) {
+    .voice-control-panel {
+        bottom: 80px;
+        padding: 0.5rem 0.75rem;
+        gap: 0.5rem;
+    }
+    
+    .voice-progress {
+        min-width: 80px;
+    }
+    
+    .feature-highlights {
+        grid-template-columns: 1fr;
+    }
+    
+    .toast {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+}
+
+/* Loading animation for voice */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.voice-loading {
+    animation: pulse 1.5s infinite;
 }
