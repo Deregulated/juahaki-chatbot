@@ -2,12 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JuaHaki Search Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JuaHaki - Kenyan Law Assistant</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body data-font-family="{{ font_family }}" data-font-size="{{ font_size }}" data-primary-color="{{ primary_color }}">
+    <!-- Mobile Menu Button -->
+    <div class="mobile-menu-btn" id="mobileMenuBtn">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
     <!-- Settings Panel -->
     <div class="settings-panel" id="settingsPanel">
         <div class="settings-header">
@@ -51,12 +58,11 @@
                         <option value="Open Sans">Open Sans</option>
                         <option value="Montserrat">Montserrat</option>
                         <option value="Arial">Arial</option>
-                        <option value="Georgia">Georgia</option>
                     </select>
                     
                     <div class="font-size-control">
                         <label>Font Size:</label>
-                        <input type="range" id="fontSize" min="12" max="24" value="16">
+                        <input type="range" id="fontSize" min="14" max="22" value="16">
                         <span id="fontSizeValue">16px</span>
                     </div>
                 </div>
@@ -70,7 +76,6 @@
                     <div class="color-option" data-color="#2563eb" style="background-color: #2563eb;"></div>
                     <div class="color-option" data-color="#dc2626" style="background-color: #dc2626;"></div>
                     <div class="color-option" data-color="#7c3aed" style="background-color: #7c3aed;"></div>
-                    <div class="color-option" data-color="#ea580c" style="background-color: #ea580c;"></div>
                     <div class="color-option" data-color="#059669" style="background-color: #059669;"></div>
                 </div>
                 
@@ -85,10 +90,10 @@
     <!-- Main Container -->
     <div class="container">
         <!-- Sidebar -->
-        <div class="sidebar">
+        <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <button class="new-chat-btn" id="newChatBtn">
-                    <span>+</span> New Search
+                    <span>+</span> New Legal Query
                 </button>
             </div>
             
@@ -101,8 +106,8 @@
                     ⚙️ Settings
                 </button>
                 <div class="user-info">
-                    <div class="avatar">JH</div>
-                    <span>JuaHaki</span>
+                    <div class="avatar">JL</div>
+                    <span>JuaHaki Law</span>
                 </div>
             </div>
         </div>
@@ -112,7 +117,7 @@
             <header class="main-header">
                 <div class="header-left">
                     <h1>JuaHaki</h1>
-                    <span class="subtitle">Know the Truth - Your AI Search Assistant</span>
+                    <span class="subtitle">Kenyan Law Specialist</span>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" id="languageBtn">
@@ -126,13 +131,16 @@
             <main class="chat-area">
                 <div class="welcome-message" id="welcomeMessage">
                     <div class="welcome-content">
-                        <h2>Welcome to JuaHaki!</h2>
-                        <p>I'm your AI search assistant. I can help you find the latest information on any topic using real-time web search.</p>
+                        <h2>Welcome to JuaHaki Law Assistant</h2>
+                        <p>I specialize exclusively in Kenyan law. Ask me about Kenyan Constitution, Acts of Parliament, legal procedures, or any Kenyan legal matter.</p>
                         <div class="quick-questions">
-                            <button class="quick-btn" data-question="latest AI developments 2024">Latest AI News</button>
-                            <button class="quick-btn" data-question="current weather in Nairobi">Nairobi Weather</button>
-                            <button class="quick-btn" data-question="Swahili culture and traditions">Swahili Culture</button>
-                            <button class="quick-btn" data-question="programming tutorials for beginners">Learn Programming</button>
+                            <button class="quick-btn" data-question="Kenyan Constitution 2010 rights">Constitutional Rights</button>
+                            <button class="quick-btn" data-question="Employment Act Kenya">Employment Law</button>
+                            <button class="quick-btn" data-question="Land registration process Kenya">Land Law</button>
+                            <button class="quick-btn" data-question="Criminal procedure code Kenya">Criminal Procedure</button>
+                        </div>
+                        <div class="legal-disclaimer">
+                            <small>Disclaimer: This provides legal information, not advice. Consult a qualified advocate for legal advice.</small>
                         </div>
                     </div>
                 </div>
@@ -145,7 +153,7 @@
                     <div class="input-wrapper">
                         <input type="text" 
                                id="messageInput" 
-                               placeholder="{{ 'Ask me anything... I will search for the latest information' if language == 'english' else 'Uliza swali lolote... Nitaafuta taarifa za hivi karibuni' }}" 
+                               placeholder="{{ 'Ask about Kenyan law, constitution, or legal system...' if language == 'english' else 'Uliza kuhusu sheria za Kenya, katiba, au mfumo wa kisheria...' }}" 
                                autocomplete="off">
                         <button id="sendBtn" class="send-btn">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -156,9 +164,9 @@
                     <div class="input-footer">
                         <span class="hint-text">
                             {% if language == 'english' %}
-                                I will search the web for current information
+                                Specialized in Kenyan legal matters only
                             {% else %}
-                                Nitaftua wavuti kwa taarifa za sasa
+                                Imejikita kwenye masuala ya kisheria ya Kenya pekee
                             {% endif %}
                         </span>
                     </div>
@@ -166,6 +174,9 @@
             </main>
         </div>
     </div>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>

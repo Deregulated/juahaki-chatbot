@@ -14,14 +14,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const uploadBgBtn = document.getElementById('uploadBgBtn');
     const uploadPreview = document.getElementById('uploadPreview');
     const quickBtns = document.querySelectorAll('.quick-btn');
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const mobileOverlay = document.getElementById('mobileOverlay');
 
     // Initialize
     initSettings();
     loadUserPreferences();
+    setupMobileMenu();
 
     // Event Listeners
     sendBtn.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', handleKeyPress);
+    messageInput.addEventListener('input', adjustInputHeight);
     newChatBtn.addEventListener('click', startNewChat);
     settingsBtn.addEventListener('click', toggleSettings);
     closeSettings.addEventListener('click', toggleSettings);
@@ -74,6 +79,32 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Functions
+    function setupMobileMenu() {
+        if (mobileMenuBtn && sidebar && mobileOverlay) {
+            mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+            mobileOverlay.addEventListener('click', closeMobileMenu);
+            
+            // Close menu when clicking on sidebar links (future enhancement)
+            sidebar.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A' || e.target.closest('a')) {
+                    closeMobileMenu();
+                }
+            });
+        }
+    }
+
+    function toggleMobileMenu() {
+        sidebar.classList.toggle('active');
+        mobileOverlay.classList.toggle('active');
+        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+    }
+
+    function closeMobileMenu() {
+        sidebar.classList.remove('active');
+        mobileOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
     function initSettings() {
         // Set initial values from session
         document.getElementById('fontFamily').value = document.body.getAttribute('data-font-family');
@@ -111,6 +142,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function adjustInputHeight() {
+        // Auto-resize textarea (if we change to textarea in future)
+        if (messageInput.tagName === 'TEXTAREA') {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + 'px';
+        }
+    }
+
     async function sendMessage() {
         const message = messageInput.value.trim();
         if (!message) return;
@@ -122,6 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add user message
         addMessage(message, 'user');
         messageInput.value = '';
+        adjustInputHeight();
 
         // Show typing indicator
         const typingIndicator = addTypingIndicator();
@@ -155,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const avatarDiv = document.createElement('div');
         avatarDiv.className = 'message-avatar';
-        avatarDiv.textContent = sender === 'user' ? 'U' : 'JH';
+        avatarDiv.textContent = sender === 'user' ? 'U' : 'JL';
         
         const contentDiv = document.createElement('div');
         contentDiv.className = 'message-content';
@@ -165,19 +205,17 @@ document.addEventListener('DOMContentLoaded', function() {
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/\n/g, '<br>');
         
-        // Add search result styling
-        if (sender === 'bot' && content.includes('Search Results') || content.includes('Based on my search')) {
-            formattedContent = formattedContent.replace(/(\d+\.\s+\*\*.*?\*\*)/g, '<div class="search-result">$1</div>');
-        }
-        
         contentDiv.innerHTML = formattedContent;
         
         messageDiv.appendChild(avatarDiv);
         messageDiv.appendChild(contentDiv);
         chatMessages.appendChild(messageDiv);
         
-        // Scroll to bottom
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        // Scroll to bottom with smooth behavior
+        chatMessages.scrollTo({
+            top: chatMessages.scrollHeight,
+            behavior: 'smooth'
+        });
     }
 
     function addTypingIndicator() {
@@ -187,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const avatarDiv = document.createElement('div');
         avatarDiv.className = 'message-avatar';
-        avatarDiv.textContent = 'JH';
+        avatarDiv.textContent = 'JL';
         
         const contentDiv = document.createElement('div');
         contentDiv.className = 'message-content';
@@ -205,7 +243,10 @@ document.addEventListener('DOMContentLoaded', function() {
         messageDiv.appendChild(contentDiv);
         chatMessages.appendChild(messageDiv);
         
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        chatMessages.scrollTo({
+            top: chatMessages.scrollHeight,
+            behavior: 'smooth'
+        });
         return messageDiv;
     }
 
@@ -221,6 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 chatMessages.innerHTML = '';
                 welcomeMessage.style.display = 'flex';
                 chatMessages.style.display = 'none';
+                closeMobileMenu(); // Close sidebar on mobile
             })
             .catch(error => {
                 console.error('Error resetting chat:', error);
@@ -229,6 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function toggleSettings() {
         settingsPanel.classList.toggle('active');
+        closeMobileMenu(); // Close sidebar when opening settings
     }
 
     async function toggleLanguage() {
@@ -244,9 +287,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const currentLanguage = data.language;
             const hintText = document.querySelector('.hint-text');
             if (currentLanguage === 'english') {
-                hintText.textContent = 'I will search the web for current information';
+                hintText.textContent = 'Specialized in Kenyan legal matters only';
             } else {
-                hintText.textContent = 'Nitaftua wavuti kwa taarifa za sasa';
+                hintText.textContent = 'Imejikita kwenye masuala ya kisheria ya Kenya pekee';
             }
             
             // Update setting
@@ -360,4 +403,20 @@ document.addEventListener('DOMContentLoaded', function() {
             ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2)
         );
     }
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            closeMobileMenu();
+        }
+    });
+
+    // Handle orientation change
+    window.addEventListener('orientationchange', function() {
+        setTimeout(() => {
+            if (window.innerWidth > 768) {
+                closeMobileMenu();
+            }
+        }, 300);
+    });
 });
